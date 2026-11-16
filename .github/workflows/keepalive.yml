@@ -1,0 +1,24 @@
+# Maintient le projet Supabase gratuit actif (il est mis en pause après 7 jours sans requête).
+# Optionnel : nécessite les secrets SUPABASE_URL et SUPABASE_ANON_KEY dans GitHub
+# (Settings → Secrets and variables → Actions). Sans ces secrets, le job est ignoré.
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: "17 6 */3 * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    if: ${{ vars.KEEPALIVE_ENABLED == 'true' }}
+    steps:
+      - name: Appel d'une fonction anodine
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          curl --fail --silent --show-error -X POST "$SUPABASE_URL/rest/v1/rpc/paris_today" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            -H "Content-Type: application/json" -d '{}'
